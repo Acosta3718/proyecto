@@ -247,6 +247,13 @@ class AdminProductosController extends BaseController
                 throw new Exception('Producto no encontrado');
             }
             
+            // Eliminar imágenes adicionales para evitar residuos y llamadas a funciones no compatibles en el motor
+            $galeria = $this->productoModel->obtenerImagenes($id);
+            foreach ($galeria as $img) {
+                $this->eliminarImagen($img['imagen']);
+            }
+            $this->productoModel->eliminarImagenesProducto($id);
+
             $resultado = $this->productoModel->eliminar($id);
             
             if ($resultado) {
@@ -257,6 +264,34 @@ class AdminProductosController extends BaseController
             }
         } catch (Exception $e) {
             $this->json(['success' => false, 'message' => $e->getMessage()], 500);
+        }
+    }
+    
+    /**
+     * Vista rápida de producto para el panel
+     */
+    public function ver($id)
+    {
+        if (!AuthController::tienePermiso('productos.ver')) {
+            return $this->json(['success' => false, 'message' => 'Sin permisos'], 403);
+        }
+
+        try {
+            $producto = $this->productoModel->obtenerDetalleConRelaciones($id);
+
+            if (!$producto) {
+                throw new Exception('Producto no encontrado');
+            }
+
+            return $this->json([
+                'success' => true,
+                'producto' => $producto
+            ]);
+        } catch (Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
         }
     }
     

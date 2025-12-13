@@ -13,7 +13,7 @@
                         <div class="d-flex justify-content-between align-items-center">
                             <div>
                                 <strong><?php echo htmlspecialchars($p['nombre']); ?></strong><br>
-                                <small>Precio base: $<?php echo $p['precio']; ?></small>
+                                <small>Precio base: Gs <?php echo number_format($p['precio'], 0, ',', '.'); ?></small>
                             </div>
                             <button class="btn btn-sm btn-primary" 
                                     onclick="asignarProducto(<?php echo $p['id']; ?>)">
@@ -40,7 +40,7 @@
                             <div class="flex-grow-1">
                                 <strong><?php echo htmlspecialchars($p['nombre']); ?></strong>
                                 <div class="input-group input-group-sm mt-2">
-                                    <span class="input-group-text">$</span>
+                                    <span class="input-group-text">Gs</span>
                                     <input type="number" class="form-control" 
                                            value="<?php echo $p['precio_lista']; ?>"
                                            onchange="actualizarPrecio(<?php echo $p['id']; ?>, this.value)">

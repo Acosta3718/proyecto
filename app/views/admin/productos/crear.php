@@ -9,7 +9,7 @@ $formAction = $esEdicion ? "/admin/productos/actualizar/{$producto['id']}" : "/a
             <h1><i class="bi bi-box-seam me-2"></i><?php echo $esEdicion ? 'Editar' : 'Nuevo'; ?> Producto</h1>
             <p class="text-muted mb-0">Complete todos los campos para <?php echo $esEdicion ? 'actualizar' : 'crear'; ?> el producto</p>
         </div>
-        <a href="/admin/productos" class="btn btn-outline-secondary">
+        <a href="<?php echo url('admin/productos'); ?>" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-2"></i>Volver al listado
         </a>
     </div>
@@ -125,7 +125,7 @@ $formAction = $esEdicion ? "/admin/productos/actualizar/{$producto['id']}" : "/a
                         <div class="col-md-3 mb-3">
                             <label for="precio" class="form-label">Precio de Venta <span class="text-danger">*</span></label>
                             <div class="input-group">
-                                <span class="input-group-text">$</span>
+                                <span class="input-group-text">Gs</span>
                                 <input type="number" 
                                        class="form-control" 
                                        id="precio" 
@@ -141,7 +141,7 @@ $formAction = $esEdicion ? "/admin/productos/actualizar/{$producto['id']}" : "/a
                         <div class="col-md-3 mb-3">
                             <label for="precio_costo" class="form-label">Precio de Costo</label>
                             <div class="input-group">
-                                <span class="input-group-text">$</span>
+                                <span class="input-group-text">Gs</span>
                                 <input type="number" 
                                        class="form-control" 
                                        id="precio_costo" 
@@ -431,7 +431,7 @@ $formAction = $esEdicion ? "/admin/productos/actualizar/{$producto['id']}" : "/a
     <div class="card mt-3">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <a href="/admin/productos" class="btn btn-outline-secondary">
+                <a href="<?php echo url('admin/productos'); ?>" class="btn btn-outline-secondary">
                     <i class="bi bi-x-lg me-2"></i>Cancelar
                 </a>
                 <div class="d-flex gap-2">

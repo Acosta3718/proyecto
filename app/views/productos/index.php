@@ -250,6 +250,11 @@ unset($p);
 
 const productosEjemplo = <?php echo json_encode($productos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
 
+const formatGs = (value) => new Intl.NumberFormat('es-PY', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+}).format(Number(value) || 0);
+
 // Función para obtener productos filtrados
 function obtenerProductosFiltrados() {
     return productosEjemplo.filter(producto => {
@@ -319,7 +324,7 @@ function renderizarProductos() {
                     <h6 class="card-title">${producto.nombre}</h6>
                     <p class="card-text text-muted small">Ref: ${producto.referencia}</p>
                     <div class="mt-auto">
-                        <p class="h5 text-primary mb-2">$${producto.precio.toFixed(2)}</p>
+                        <p class="h5 text-primary mb-2">Gs ${formatGs(producto.precio)}</p>
                         <button class="btn btn-primary btn-sm w-100">
                             <i class="bi bi-cart-plus"></i> Agregar
                         </button>

@@ -147,7 +147,7 @@ $pagina = 'dashboard';
                                     </td>
                                     <td><?php echo htmlspecialchars($producto['marca']); ?></td>
                                     <td><?php echo htmlspecialchars($producto['categoria']); ?></td>
-                                    <td><strong>$<?php echo number_format($producto['precio'], 2); ?></strong></td>
+                                    <td><strong>Gs <?php echo number_format($producto['precio'], 0, ',', '.'); ?></strong></td>
                                     <td>
                                         <?php if ($producto['stock'] > 10): ?>
                                             <span class="badge bg-success"><?php echo $producto['stock']; ?></span>

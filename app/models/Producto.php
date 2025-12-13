@@ -323,7 +323,7 @@ class Producto
 
     public function obtenerTodosConRelaciones()
     {
-        $sql = "SELECT 
+        $sql = "SELECT
                     p.*,
                     m.nombre AS marca_nombre,
                     c.nombre AS categoria_nombre,
@@ -339,6 +339,38 @@ class Producto
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
     }
     
+    /**
+     * Obtener detalle de producto con relaciones y galería
+     */
+    public function obtenerDetalleConRelaciones($id)
+    {
+        $sql = "SELECT
+                    p.*,
+                    m.nombre AS marca_nombre,
+                    c.nombre AS categoria_nombre,
+                    s.nombre AS sector_nombre
+                FROM productos p
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                LEFT JOIN categorias c ON p.categoria_id = c.id
+                LEFT JOIN sectores s ON p.sector_id = s.id
+                WHERE p.id = :id";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute();
+
+        $producto = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        if (!$producto) {
+            return null;
+        }
+
+        // Adjuntar imágenes adicionales sin depender de funciones JSON del motor
+        $producto['galeria'] = $this->obtenerImagenes($id);
+
+        return $producto;
+    }
+
     /**
      * Obtener todas las marcas disponibles
      */
@@ -482,7 +514,53 @@ class Producto
         $sql = "UPDATE {$this->tabla} SET activo = 0 WHERE id = :id";
         $stmt = $this->db->prepare($sql);
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
-        
+
+        return $stmt->execute();
+    }
+
+    /**
+     * Obtener imágenes adicionales de un producto
+     */
+    public function obtenerImagenes($productoId)
+    {
+        $sql = "SELECT id, imagen, orden
+                FROM producto_imagenes
+                WHERE producto_id = :producto_id
+                ORDER BY orden ASC, id ASC";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':producto_id', $productoId, PDO::PARAM_INT);
+        $stmt->execute();
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+    }
+
+    /**
+     * Registrar una nueva imagen adicional para un producto
+     */
+    public function agregarImagen($productoId, $rutaImagen, $orden = 0)
+    {
+        $sql = "INSERT INTO producto_imagenes (producto_id, imagen, orden)
+                VALUES (:producto_id, :imagen, :orden)";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':producto_id', $productoId, PDO::PARAM_INT);
+        $stmt->bindParam(':imagen', $rutaImagen);
+        $stmt->bindParam(':orden', $orden, PDO::PARAM_INT);
+
+        return $stmt->execute();
+    }
+
+     /**
+      * Eliminar todas las imágenes adicionales de un producto
+      */ 
+    public function eliminarImagenesProducto($productoId)
+    {
+        $sql = "DELETE FROM producto_imagenes WHERE producto_id = :producto_id";
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':producto_id', $productoId, PDO::PARAM_INT);
+
         return $stmt->execute();
     }
 }

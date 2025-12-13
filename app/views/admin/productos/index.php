@@ -134,6 +134,10 @@
 <?php require_once __DIR__ . '/../../layouts/admin_footer.php'; ?>
 <script>
 const placeholderImage = '<?php echo asset('img/placeholder.svg'); ?>';
+const formatGs = (value) => new Intl.NumberFormat('es-PY', {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
+}).format(Number(value) || 0);
 let tablaProductos;
 
 $(document).ready(function() {
@@ -193,7 +197,7 @@ $(document).ready(function() {
                 data: 'precio',
                 className: 'text-end',
                 render: function(data) {
-                    return `<strong>$${parseFloat(data).toFixed(2)}</strong>`;
+                    return `<strong>Gs ${formatGs(data)}</strong>`;
                 }
             },
             { 
@@ -241,7 +245,7 @@ $(document).ready(function() {
                              </button>`;
                     
                     <?php if (AuthController::tienePermiso('productos.editar')): ?>
-                    html += `<a href="/admin/productos/editar/${row.id}" 
+                    html += `<a href="<?php echo url('/admin/productos/editar/'); ?>${row.id}"
                                 class="btn btn-outline-primary" 
                                 title="Editar">
                                 <i class="bi bi-pencil"></i>
@@ -316,7 +320,7 @@ function verProducto(id) {
     const modal = new bootstrap.Modal(document.getElementById('modalVistaRapida'));
     modal.show();
     
-    fetch(`/admin/productos/ver/${id}`)
+    fetch(`<?php echo url('/admin/productos/ver/'); ?>${id}`)
         .then(r => r.json())
         .then(data => {
             if (data.success) {
@@ -340,7 +344,7 @@ function verProducto(id) {
                                     <strong>Sector:</strong> ${p.sector_nombre || '-'}
                                 </div>
                                 <div class="col-6">
-                                    <strong>Precio:</strong> $${parseFloat(p.precio).toFixed(2)}<br>
+                                    <strong>Precio:</strong> Gs ${formatGs(p.precio)}<br>
                                     <strong>Stock:</strong> ${p.stock} unidades<br>
                                     <strong>Estado:</strong> ${p.activo ? 'Activo' : 'Inactivo'}<br>
                                     <strong>Destacado:</strong> ${p.destacado ? 'Sí' : 'No'}
@@ -349,7 +353,22 @@ function verProducto(id) {
                         </div>
                     </div>
                 `;
+                } else {
+                document.getElementById('contenidoVistaRapida').innerHTML = `
+                    <div class="alert alert-danger mb-0">
+                        <i class="bi bi-exclamation-triangle me-2"></i>
+                        ${data.message || 'No se pudo cargar la información del producto.'}
+                    </div>
+                `;
             }
+            })
+        .catch(() => {
+            document.getElementById('contenidoVistaRapida').innerHTML = `
+                <div class="alert alert-danger mb-0">
+                    <i class="bi bi-wifi-off me-2"></i>
+                    Ocurrió un error al cargar la vista rápida. Intente nuevamente.
+                </div>
+            `;
         });
 }
 
