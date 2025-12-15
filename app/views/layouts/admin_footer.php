@@ -12,6 +12,30 @@
 <script src="https://cdn.datatables.net/1.13.6/js/dataTables.bootstrap5.min.js"></script>
 
 <script>
+// Configuración de idioma para DataTables (evita dependencias externas y errores de CORS)
+const dataTableLangEs = {
+    decimal: ',',
+    emptyTable: 'No hay datos disponibles en la tabla',
+    info: 'Mostrando _START_ a _END_ de _TOTAL_ registros',
+    infoEmpty: 'Mostrando 0 a 0 de 0 registros',
+    infoFiltered: '(filtrado de _MAX_ registros en total)',
+    lengthMenu: 'Mostrar _MENU_ registros',
+    loadingRecords: 'Cargando...',
+    processing: 'Procesando...',
+    search: 'Buscar:',
+    zeroRecords: 'No se encontraron resultados',
+    paginate: {
+        first: 'Primero',
+        last: 'Último',
+        next: 'Siguiente',
+        previous: 'Anterior'
+    },
+    aria: {
+        sortAscending: ': activar para ordenar la columna ascendente',
+        sortDescending: ': activar para ordenar la columna descendente'
+    }
+};
+
 // Toggle Sidebar en móvil
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('show');
@@ -33,9 +57,7 @@ document.addEventListener('click', function(e) {
 $(document).ready(function() {
     if ($.fn.DataTable) {
         $('.datatable').DataTable({
-            language: {
-                url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-            },
+            language: dataTableLangEs,
             pageLength: 25,
             responsive: true,
             dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip'

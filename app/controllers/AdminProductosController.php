@@ -248,11 +248,16 @@ class AdminProductosController extends BaseController
             }
             
             // Eliminar imágenes adicionales para evitar residuos y llamadas a funciones no compatibles en el motor
-            $galeria = $this->productoModel->obtenerImagenes($id);
-            foreach ($galeria as $img) {
-                $this->eliminarImagen($img['imagen']);
+            try {
+                $galeria = $this->productoModel->obtenerImagenes($id);
+                foreach ($galeria as $img) {
+                    $this->eliminarImagen($img['imagen']);
+                }
+                $this->productoModel->eliminarImagenesProducto($id);
+            } catch (Exception $e) {
+                // Registrar pero continuar con el borrado lógico del producto
+                error_log('No se pudieron limpiar las imágenes adicionales: ' . $e->getMessage());
             }
-            $this->productoModel->eliminarImagenesProducto($id);
 
             $resultado = $this->productoModel->eliminar($id);
             

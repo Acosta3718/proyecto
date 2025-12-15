@@ -122,9 +122,7 @@
 // Inicializar DataTable
 $(document).ready(function() {
     $('#tablaCategorias').DataTable({
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-        },
+        language: typeof dataTableLangEs !== 'undefined' ? dataTableLangEs : {},
         pageLength: 25,
         order: [[6, 'asc']], // Ordenar por columna "Orden"
         columnDefs: [

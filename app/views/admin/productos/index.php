@@ -265,9 +265,7 @@ $(document).ready(function() {
                 }
             }
         ],
-        language: {
-            url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
-        },
+        language: typeof dataTableLangEs !== 'undefined' ? dataTableLangEs : {},
         pageLength: 25,
         order: [[0, 'desc']],
         responsive: true,
