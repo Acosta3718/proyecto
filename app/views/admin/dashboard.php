@@ -135,7 +135,8 @@ $pagina = 'dashboard';
                                 <tr>
                                     <td>
                                         <?php $placeholder = asset('img/placeholder.svg'); ?>
-                                        <img src="<?php echo $producto['imagen'] ?? $placeholder; ?>"
+                                        <?php $imagenProducto = !empty($producto['imagen']) ? $producto['imagen'] : $placeholder; ?>
+                                        <img src="<?php echo htmlspecialchars($imagenProducto); ?>"
                                              alt="<?php echo htmlspecialchars($producto['nombre']); ?>"
                                              class="rounded"
                                              style="width: 50px; height: 50px; object-fit: cover;"

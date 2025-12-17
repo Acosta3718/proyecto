@@ -1,6 +1,13 @@
 <?php
 $esEdicion = isset($producto);
-$formAction = $esEdicion ? "/admin/productos/actualizar/{$producto['id']}" : "/admin/productos/guardar";
+$formAction = $esEdicion
+    ? url("admin/productos/actualizar/{$producto['id']}")
+    : url('admin/productos/guardar');
+$listadoProductosUrl = url('admin/productos');
+$eliminarImagenBaseUrl = url('admin/productos/eliminar-imagen');
+$imagenPrincipal = $esEdicion && !empty($producto['imagen'])
+    ? asset(ltrim($producto['imagen'], '/'))
+    : '';
 ?>
 
 <div class="page-header mb-4">
@@ -9,7 +16,7 @@ $formAction = $esEdicion ? "/admin/productos/actualizar/{$producto['id']}" : "/a
             <h1><i class="bi bi-box-seam me-2"></i><?php echo $esEdicion ? 'Editar' : 'Nuevo'; ?> Producto</h1>
             <p class="text-muted mb-0">Complete todos los campos para <?php echo $esEdicion ? 'actualizar' : 'crear'; ?> el producto</p>
         </div>
-        <a href="<?php echo url('admin/productos'); ?>" class="btn btn-outline-secondary">
+        <a href="<?php echo $listadoProductosUrl; ?>" class="btn btn-outline-secondary">
             <i class="bi bi-arrow-left me-2"></i>Volver al listado
         </a>
     </div>
@@ -277,10 +284,10 @@ $formAction = $esEdicion ? "/admin/productos/actualizar/{$producto['id']}" : "/a
                         <div class="form-text">Imagen principal del producto (máx 5MB)</div>
                         
                         <div class="mt-3">
-                            <?php if ($esEdicion && $producto['imagen']): ?>
-                            <img id="imagenPreview" 
-                                 src="<?php echo htmlspecialchars($producto['imagen']); ?>" 
-                                 alt="Preview" 
+                            <?php if ($imagenPrincipal): ?>
+                            <img id="imagenPreview"
+                                 src="<?php echo htmlspecialchars($imagenPrincipal); ?>"
+                                 alt="Preview"
                                  class="img-thumbnail" 
                                  style="max-width: 200px;">
                             <?php else: ?>
@@ -309,11 +316,12 @@ $formAction = $esEdicion ? "/admin/productos/actualizar/{$producto['id']}" : "/a
                         <div id="galeriaPreview" class="row g-2 mt-2">
                             <?php if ($esEdicion && isset($imagenes)): ?>
                                 <?php foreach ($imagenes as $img): ?>
-                                <div class="col-md-3 position-relative">
-                                    <img src="<?php echo htmlspecialchars($img['imagen']); ?>" 
+                                <?php $imagenGaleria = asset(ltrim($img['imagen'], '/')); ?>
+                                    <div class="col-md-3 position-relative">
+                                    <img src="<?php echo htmlspecialchars($imagenGaleria); ?>"
                                          class="img-thumbnail w-100" 
                                          style="height: 150px; object-fit: cover;">
-                                    <button type="button" 
+                                    <button type="button"
                                             class="btn btn-sm btn-danger position-absolute top-0 end-0 m-1"
                                             onclick="eliminarImagenGaleria(<?php echo $img['id']; ?>)">
                                         <i class="bi bi-x"></i>
@@ -431,7 +439,7 @@ $formAction = $esEdicion ? "/admin/productos/actualizar/{$producto['id']}" : "/a
     <div class="card mt-3">
         <div class="card-body">
             <div class="d-flex justify-content-between align-items-center">
-                <a href="<?php echo url('admin/productos'); ?>" class="btn btn-outline-secondary">
+               <a href="<?php echo $listadoProductosUrl; ?>" class="btn btn-outline-secondary">
                     <i class="bi bi-x-lg me-2"></i>Cancelar
                 </a>
                 <div class="d-flex gap-2">
@@ -495,15 +503,30 @@ function previewMultipleImages(input) {
 function eliminarImagenGaleria(id) {
     if (!confirm('¿Eliminar esta imagen?')) return;
     
-    fetch(`/admin/productos/eliminar-imagen/${id}`, {
+    fetch(`${'<?php echo $eliminarImagenBaseUrl; ?>'}/${id}`, {
         method: 'DELETE'
     })
-    .then(r => r.json())
+    .then(async response => {
+        const contentType = response.headers.get('content-type');
+
+        if (contentType && contentType.includes('application/json')) {
+            return response.json();
+        }
+
+        const text = await response.text();
+        throw new Error(text || 'Respuesta no válida del servidor');
+    })
     .then(data => {
         if (data.success) {
             mostrarNotificacion('Imagen eliminada', 'success');
             location.reload();
+        } else {
+            throw new Error(data.message || 'No se pudo eliminar la imagen');
         }
+    })
+    .catch(error => {
+        console.error('Error al eliminar imagen:', error);
+        mostrarNotificacion('Error al eliminar la imagen', 'error');
     });
 }
 
@@ -522,22 +545,30 @@ document.getElementById('formProducto').addEventListener('submit', function(e) {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
+    .then(async response => {
+        const contentType = response.headers.get('content-type');
+
+        if (contentType && contentType.includes('application/json')) {
+            const data = await response.json();
+            return { ok: response.ok, data };
+        }
+
+        const text = await response.text();
+        throw new Error(text || 'Respuesta no válida del servidor');
+    })
+    .then(({ ok, data }) => {
+        if (ok && data.success) {
             mostrarNotificacion('Producto guardado exitosamente', 'success');
             setTimeout(() => {
-                window.location.href = '/admin/productos';
+                window.location.href = '<?php echo $listadoProductosUrl; ?>';
             }, 1500);
         } else {
-            mostrarNotificacion(data.message || 'Error al guardar', 'error');
-            btnGuardar.disabled = false;
-            btnGuardar.innerHTML = textoOriginal;
+            throw new Error(data.message || 'Error al guardar');
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        mostrarNotificacion('Error al procesar la solicitud', 'error');
+        mostrarNotificacion(error.message || 'Error al procesar la solicitud', 'error');
         btnGuardar.disabled = false;
         btnGuardar.innerHTML = textoOriginal;
     });

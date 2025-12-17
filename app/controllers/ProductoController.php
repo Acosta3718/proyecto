@@ -57,6 +57,7 @@ class ProductoController extends BaseController
             $p['precio'] = isset($p['precio']) ? (float)$p['precio'] : 0;
             $p['precio_costo'] = isset($p['precio_costo']) ? (float)$p['precio_costo'] : 0;
             $p['stock'] = isset($p['stock']) ? (int)$p['stock'] : 0;
+            $p['imagen'] = $this->construirUrlImagen($p['imagen'] ?? '');
         }
         unset($p);
         
@@ -119,11 +120,18 @@ class ProductoController extends BaseController
                 'limite' => $porPagina,
                 'offset' => $offset
             ]);
+
+            // Normalizar URLs de imágenes para el cliente
+            $productos = $resultado['productos'];
+            foreach ($productos as &$producto) {
+                $producto['imagen'] = $this->construirUrlImagen($producto['imagen'] ?? '');
+            }
+            unset($producto);
             
             echo json_encode([
                 'success' => true,
                 'data' => [
-                    'productos' => $resultado['productos'],
+                    'productos' => $productos,
                     'total' => $resultado['total'],
                     'pagina' => $pagina,
                     'totalPaginas' => ceil($resultado['total'] / $porPagina)
@@ -151,11 +159,18 @@ class ProductoController extends BaseController
             return;
         }
         
+        $producto['imagen'] = $this->construirUrlImagen($producto['imagen'] ?? '');
+
         $productosRelacionados = $this->productoModel->obtenerRelacionados(
-            $producto['categoria'], 
-            $producto['id'], 
+            $producto['categoria_id'],
+            $producto['id'],
             4
         );
+
+        foreach ($productosRelacionados as &$relacionado) {
+            $relacionado['imagen'] = $this->construirUrlImagen($relacionado['imagen'] ?? '');
+        }
+        unset($relacionado);
         
         $data = [
             'producto' => $producto,
@@ -210,6 +225,22 @@ class ProductoController extends BaseController
                 'message' => 'Error al obtener filtros'
             ]);
         }
+    }
+
+    /**
+     * Devuelve la URL absoluta de una imagen almacenada en /public/uploads
+     */
+    private function construirUrlImagen($ruta)
+    {
+        if (empty($ruta)) {
+            return '';
+        }
+
+        if (preg_match('/^https?:\/\//', $ruta)) {
+            return $ruta;
+        }
+
+        return asset(ltrim($ruta, '/'));
     }
 }
 ?>

@@ -342,7 +342,7 @@ class AdminProductosController extends BaseController
             'descripcion_corta' => $this->sanitize($datos['descripcion_corta'] ?? ''),
             'marca_id' => (int)$datos['marca_id'],
             'categoria_id' => (int)$datos['categoria_id'],
-            'sector_id' => isset($datos['sector_id']) ? (int)$datos['sector_id'] : null,
+            'sector_id' => !empty($datos['sector_id']) ? (int)$datos['sector_id'] : null,
             'referencia' => $this->sanitize($datos['referencia']),
             'codigo_barras' => $this->sanitize($datos['codigo_barras'] ?? ''),
             'precio' => (float)$datos['precio'],

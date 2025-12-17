@@ -303,17 +303,17 @@ class Producto
     /**
      * Obtener productos relacionados
      */
-    public function obtenerRelacionados($categoria, $idExcluir, $limite = 4)
+    public function obtenerRelacionados($categoriaId, $idExcluir, $limite = 4)
     {
-        $sql = "SELECT * FROM {$this->tabla} 
-                WHERE categoria = :categoria 
+        $sql = "SELECT * FROM {$this->tabla}
+                WHERE categoria_id = :categoria_id
                 AND id != :idExcluir 
                 AND activo = 1 
                 ORDER BY RAND() 
                 LIMIT :limite";
         
         $stmt = $this->db->prepare($sql);
-        $stmt->bindParam(':categoria', $categoria);
+        $stmt->bindParam(':categoria_id', $categoriaId, PDO::PARAM_INT);
         $stmt->bindParam(':idExcluir', $idExcluir, PDO::PARAM_INT);
         $stmt->bindParam(':limite', $limite, PDO::PARAM_INT);
         $stmt->execute();
@@ -427,10 +427,17 @@ class Producto
      */
     public function buscarAutocompletado($termino, $limite = 10)
     {
-        $sql = "SELECT id, nombre, marca, referencia, precio, imagen 
-                FROM {$this->tabla} 
-                WHERE activo = 1 
-                AND (nombre LIKE :termino OR marca LIKE :termino OR referencia LIKE :termino) 
+        $sql = "SELECT
+                    p.id,
+                    p.nombre,
+                    m.nombre AS marca,
+                    p.referencia,
+                    p.precio,
+                    p.imagen
+                FROM {$this->tabla} p
+                LEFT JOIN marcas m ON p.marca_id = m.id
+                WHERE p.activo = 1
+                AND (p.nombre LIKE :termino OR m.nombre LIKE :termino OR p.referencia LIKE :termino) 
                 LIMIT :limite";
         
         $stmt = $this->db->prepare($sql);
@@ -447,23 +454,83 @@ class Producto
      */
     public function crear($datos)
     {
-        $sql = "INSERT INTO {$this->tabla} 
-                (nombre, descripcion, marca, categoria, sector, referencia, precio, stock, imagen, activo) 
-                VALUES (:nombre, :descripcion, :marca, :categoria, :sector, :referencia, :precio, :stock, :imagen, :activo)";
+        $sql = "INSERT INTO {$this->tabla}
+                (
+                    nombre,
+                    descripcion,
+                    descripcion_corta,
+                    marca_id,
+                    categoria_id,
+                    sector_id,
+                    referencia,
+                    codigo_barras,
+                    precio,
+                    precio_costo,
+                    stock,
+                    stock_minimo,
+                    peso,
+                    dimensiones,
+                    garantia,
+                    imagen,
+                    activo,
+                    destacado,
+                    nuevo,
+                    slug
+                )
+                VALUES (
+                    :nombre,
+                    :descripcion,
+                    :descripcion_corta,
+                    :marca_id,
+                    :categoria_id,
+                    :sector_id,
+                    :referencia,
+                    :codigo_barras,
+                    :precio,
+                    :precio_costo,
+                    :stock,
+                    :stock_minimo,
+                    :peso,
+                    :dimensiones,
+                    :garantia,
+                    :imagen,
+                    :activo,
+                    :destacado,
+                    :nuevo,
+                    :slug
+                )";
         
         $stmt = $this->db->prepare($sql);
         
         $stmt->bindParam(':nombre', $datos['nombre']);
         $stmt->bindParam(':descripcion', $datos['descripcion']);
-        $stmt->bindParam(':marca', $datos['marca']);
-        $stmt->bindParam(':categoria', $datos['categoria']);
-        $stmt->bindParam(':sector', $datos['sector']);
+        $stmt->bindParam(':descripcion_corta', $datos['descripcion_corta']);
+        $stmt->bindParam(':marca_id', $datos['marca_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':categoria_id', $datos['categoria_id'], PDO::PARAM_INT);
+        $stmt->bindValue(
+            ':sector_id',
+            $datos['sector_id'],
+            $datos['sector_id'] === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+        );
         $stmt->bindParam(':referencia', $datos['referencia']);
+        $stmt->bindParam(':codigo_barras', $datos['codigo_barras']);
         $stmt->bindParam(':precio', $datos['precio']);
+        $stmt->bindParam(':precio_costo', $datos['precio_costo']);
         $stmt->bindParam(':stock', $datos['stock']);
+        $stmt->bindParam(':stock_minimo', $datos['stock_minimo']);
+        $stmt->bindValue(
+            ':peso',
+            $datos['peso'],
+            $datos['peso'] === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+        );
+        $stmt->bindParam(':dimensiones', $datos['dimensiones']);
+        $stmt->bindParam(':garantia', $datos['garantia']);
         $stmt->bindParam(':imagen', $datos['imagen']);
         $stmt->bindParam(':activo', $datos['activo']);
-        
+        $stmt->bindParam(':destacado', $datos['destacado']);
+        $stmt->bindParam(':nuevo', $datos['nuevo']);
+        $stmt->bindParam(':slug', $datos['slug']);
+
         if ($stmt->execute()) {
             return $this->db->lastInsertId();
         }
@@ -476,17 +543,27 @@ class Producto
      */
     public function actualizar($id, $datos)
     {
-        $sql = "UPDATE {$this->tabla} SET 
+        $sql = "UPDATE {$this->tabla} SET
                 nombre = :nombre,
                 descripcion = :descripcion,
-                marca = :marca,
-                categoria = :categoria,
-                sector = :sector,
+                descripcion_corta = :descripcion_corta,
+                marca_id = :marca_id,
+                categoria_id = :categoria_id,
+                sector_id = :sector_id,
                 referencia = :referencia,
+                codigo_barras = :codigo_barras,
                 precio = :precio,
+                precio_costo = :precio_costo,
                 stock = :stock,
+                stock_minimo = :stock_minimo,
+                peso = :peso,
+                dimensiones = :dimensiones,
+                garantia = :garantia,
                 imagen = :imagen,
-                activo = :activo
+                activo = :activo,
+                destacado = :destacado,
+                nuevo = :nuevo,
+                slug = :slug
                 WHERE id = :id";
         
         $stmt = $this->db->prepare($sql);
@@ -494,14 +571,32 @@ class Producto
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
         $stmt->bindParam(':nombre', $datos['nombre']);
         $stmt->bindParam(':descripcion', $datos['descripcion']);
-        $stmt->bindParam(':marca', $datos['marca']);
-        $stmt->bindParam(':categoria', $datos['categoria']);
-        $stmt->bindParam(':sector', $datos['sector']);
+        $stmt->bindParam(':descripcion_corta', $datos['descripcion_corta']);
+        $stmt->bindParam(':marca_id', $datos['marca_id'], PDO::PARAM_INT);
+        $stmt->bindParam(':categoria_id', $datos['categoria_id'], PDO::PARAM_INT);
+        $stmt->bindValue(
+            ':sector_id',
+            $datos['sector_id'],
+            $datos['sector_id'] === null ? PDO::PARAM_NULL : PDO::PARAM_INT
+        );
         $stmt->bindParam(':referencia', $datos['referencia']);
+        $stmt->bindParam(':codigo_barras', $datos['codigo_barras']);
         $stmt->bindParam(':precio', $datos['precio']);
+        $stmt->bindParam(':precio_costo', $datos['precio_costo']);
         $stmt->bindParam(':stock', $datos['stock']);
+        $stmt->bindParam(':stock_minimo', $datos['stock_minimo']);
+        $stmt->bindValue(
+            ':peso',
+            $datos['peso'],
+            $datos['peso'] === null ? PDO::PARAM_NULL : PDO::PARAM_STR
+        );
+        $stmt->bindParam(':dimensiones', $datos['dimensiones']);
+        $stmt->bindParam(':garantia', $datos['garantia']);
         $stmt->bindParam(':imagen', $datos['imagen']);
         $stmt->bindParam(':activo', $datos['activo']);
+        $stmt->bindParam(':destacado', $datos['destacado']);
+        $stmt->bindParam(':nuevo', $datos['nuevo']);
+        $stmt->bindParam(':slug', $datos['slug']);
         
         return $stmt->execute();
     }
@@ -516,6 +611,54 @@ class Producto
         $stmt->bindParam(':id', $id, PDO::PARAM_INT);
 
         return $stmt->execute();
+    }
+
+    /**
+     * Verificar si el slug ya está en uso
+     */
+    public function slugExiste($slug, $excluirId = null)
+    {
+        $sql = "SELECT COUNT(*) as total FROM {$this->tabla} WHERE slug = :slug";
+
+        if ($excluirId) {
+            $sql .= " AND id != :id";
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':slug', $slug);
+
+        if ($excluirId) {
+            $stmt->bindParam(':id', $excluirId, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result['total'] > 0;
+    }
+    
+    /**
+     * Verificar si la referencia ya está en uso
+     */
+    public function referenciaExiste($referencia, $excluirId = null)
+    {
+        $sql = "SELECT COUNT(*) as total FROM {$this->tabla} WHERE referencia = :referencia";
+
+        if ($excluirId) {
+            $sql .= " AND id != :id";
+        }
+
+        $stmt = $this->db->prepare($sql);
+        $stmt->bindParam(':referencia', $referencia);
+
+        if ($excluirId) {
+            $stmt->bindParam(':id', $excluirId, PDO::PARAM_INT);
+        }
+
+        $stmt->execute();
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        return $result['total'] > 0;
     }
 
     /**

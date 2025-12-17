@@ -93,7 +93,14 @@ class AdminController extends BaseController
     private function obtenerUltimosProductos($limite = 5)
     {
         try {
-            return $this->productoModel->obtenerUltimosProductos($limite);
+            $productos = $this->productoModel->obtenerUltimosProductos($limite);
+
+            foreach ($productos as &$producto) {
+                $producto['imagen'] = $this->construirUrlImagen($producto['imagen'] ?? '');
+            }
+            unset($producto);
+
+            return $productos;
         } catch (Exception $e) {
             return [];
         }
@@ -108,6 +115,22 @@ class AdminController extends BaseController
         return [];
     }
 
+    /**
+     * Devuelve la URL absoluta de una imagen almacenada en /public/uploads
+     */
+    private function construirUrlImagen($ruta)
+    {
+        if (empty($ruta)) {
+            return '';
+        }
+
+        if (preg_match('/^https?:\/\//', $ruta)) {
+            return $ruta;
+        }
+
+        return asset(ltrim($ruta, '/'));
+    }
+    
     public function productos()
     {
         try {

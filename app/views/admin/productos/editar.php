@@ -1,6 +1,9 @@
 <?php
 $esEdicion = isset($producto);
 $formAction = $esEdicion ? "/admin/productos/actualizar/{$producto['id']}" : "/admin/productos/guardar";
+$imagenPrincipal = $esEdicion && !empty($producto['imagen'])
+    ? asset(ltrim($producto['imagen'], '/'))
+    : '';
 ?>
 
 <div class="page-header mb-4">
@@ -277,10 +280,10 @@ $formAction = $esEdicion ? "/admin/productos/actualizar/{$producto['id']}" : "/a
                         <div class="form-text">Imagen principal del producto (máx 5MB)</div>
                         
                         <div class="mt-3">
-                            <?php if ($esEdicion && $producto['imagen']): ?>
-                            <img id="imagenPreview" 
-                                 src="<?php echo htmlspecialchars($producto['imagen']); ?>" 
-                                 alt="Preview" 
+                            <?php if ($imagenPrincipal): ?>
+                            <img id="imagenPreview"
+                                 src="<?php echo htmlspecialchars($imagenPrincipal); ?>"
+                                 alt="Preview"
                                  class="img-thumbnail" 
                                  style="max-width: 200px;">
                             <?php else: ?>
@@ -309,8 +312,9 @@ $formAction = $esEdicion ? "/admin/productos/actualizar/{$producto['id']}" : "/a
                         <div id="galeriaPreview" class="row g-2 mt-2">
                             <?php if ($esEdicion && isset($imagenes)): ?>
                                 <?php foreach ($imagenes as $img): ?>
+                                    <?php $imagenGaleria = asset(ltrim($img['imagen'], '/')); ?>
                                 <div class="col-md-3 position-relative">
-                                    <img src="<?php echo htmlspecialchars($img['imagen']); ?>" 
+                                    <img src="<?php echo htmlspecialchars($imagenGaleria); ?>"
                                          class="img-thumbnail w-100" 
                                          style="height: 150px; object-fit: cover;">
                                     <button type="button" 

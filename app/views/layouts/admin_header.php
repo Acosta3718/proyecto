@@ -8,6 +8,9 @@ $usuario = AuthController::usuarioActual();
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?php echo $titulo ?? 'Panel de Administración'; ?> - Mi Tienda</title>
     
+    <!-- jQuery (necesario antes de scripts inline en vistas) -->
+    <script src="https://code.jquery.com/jquery-3.7.0.min.js"></script>
+
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
@@ -402,4 +405,4 @@ $usuario = AuthController::usuarioActual();
     </nav>
     
     <!-- Content Area -->
-    <div class="content-area"</div>
+    <div class="content-area">
