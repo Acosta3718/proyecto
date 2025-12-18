@@ -56,11 +56,25 @@ document.addEventListener('click', function(e) {
 // Inicializar DataTables
 $(document).ready(function() {
     if ($.fn.DataTable) {
-        $('.datatable').DataTable({
-            language: dataTableLangEs,
-            pageLength: 25,
-            responsive: true,
-            dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip'
+        $('.datatable').each(function() {
+            const $table = $(this);
+
+            if ($table.data('datatableManual')) {
+                return;
+            }
+
+            if ($.fn.DataTable.isDataTable(this)) {
+                return;
+            }
+
+            $table.DataTable({
+                language: {
+                    url: '//cdn.datatables.net/plug-ins/1.13.6/i18n/es-ES.json'
+                },
+                pageLength: 25,
+                responsive: true,
+                dom: '<"row"<"col-sm-12 col-md-6"l><"col-sm-12 col-md-6"f>>rtip'
+            });
         });
     }
 });

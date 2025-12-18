@@ -14,8 +14,6 @@
             background-color: #f8f9fa;
             border-radius: 8px;
             padding: 20px;
-            position: sticky;
-            top: 20px;
         }
         
         .producto-card {
@@ -37,10 +35,63 @@
             margin: 3px;
         }
         
+        /* En pantallas grandes, sticky */
+        @media (min-width: 769px) {
+            .filtros-sidebar {
+                position: sticky;
+                top: 20px;
+            }
+        }
+
+        /* Overlay para móviles */
+        .filtros-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100vh;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 1040;
+        }
+
+        .filtros-overlay.show {
+            display: block;
+        }
+
+        /* Estilos para móviles */
         @media (max-width: 768px) {
+            .col-filtros-mobile {
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 80%;
+                max-width: 320px;
+                height: 100vh;
+                z-index: 1050;
+                transition: left 0.3s ease-in-out;
+                background: white;
+                overflow-y: auto;
+            }
+
+            .col-filtros-mobile.show {
+                left: 0;
+            }
+
             .filtros-sidebar {
                 position: static;
-                margin-bottom: 20px;
+                height: 100%;
+                border-radius: 0;
+            }
+        }
+
+        @media (min-width: 769px) {
+            .filtros-overlay {
+                display: none !important;
+            }
+
+            .btn-cerrar-filtros {
+                display: none !important;
             }
         }
     </style>
@@ -54,16 +105,16 @@
             <i class="bi bi-shop"></i> Mi Tienda
         </a>
         
-        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+        <button class="navbar-toggler d-md-none" type="button" id="navbarToggler">
             <span class="navbar-toggler-icon"></span>
         </button>
         
-        <div class="collapse navbar-collapse" id="navbarNav">
-            <form class="d-flex mx-auto w-50" id="formBusqueda" style="max-width: 600px;">
+        <div class="d-flex flex-grow-1 align-items-center gap-3">
+            <form class="d-flex flex-grow-1 justify-content-center" id="formBusqueda" style="max-width: 650px;">
                 <div class="input-group">
-                    <input type="text" class="form-control" id="busqueda" 
-                           placeholder="Buscar por descripción, marca o referencia..." 
-                           name="busqueda" value="<?php echo isset($_GET['busqueda']) ? htmlspecialchars($_GET['busqueda']) : ''; ?>">
+                    <input type="text" class="form-control" id="busqueda"
+                           placeholder="Buscar por descripción, marca o referencia..."
+                           name="busqueda" value="<?php echo isset($_GET['busqueda']) ? htmlspecialchars($_GET['busqueda']) : '' ; ?>">
                     <button class="btn btn-light" type="submit">
                         <i class="bi bi-search"></i> Buscar
                     </button>
@@ -79,12 +130,15 @@
     </div>
 </nav>
 
+<!-- Overlay para filtros en móviles -->
+<div class="filtros-overlay" id="filtrosOverlay"></div>
+
 <div class="container-fluid mt-4">
     <div class="row">
         
         <!-- Sidebar de Filtros -->
-        <div class="col-lg-3 col-md-4">
-            <div class="filtros-sidebar">
+         <div class="col-lg-3 col-md-4 d-none d-md-block">
+            <div class="filtros-sidebar" id="filtrosSidebarDesktop">
                 <div class="d-flex justify-content-between align-items-center mb-3">
                     <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtros</h5>
                     <button class="btn btn-sm btn-outline-secondary" id="limpiarFiltros">
@@ -93,11 +147,111 @@
                 </div>
                 
                 <!-- Filtros Activos -->
+                <div id="filtrosActivosDesktop" class="mb-3"></div>
+
+                <!-- Filtro por Marca -->
+                <div class="filtro-section">
+                    <button class="btn btn-outline-primary w-100 text-start d-flex justify-content-between align-items-center"
+                            type="button" data-bs-toggle="collapse" data-bs-target="#filtroMarcaDesktop">
+                        <span><i class="bi bi-tag"></i> Marca</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="collapse show mt-2" id="filtroMarcaDesktop">
+                        <?php if (!empty($marcas)): ?>
+                            <?php foreach ($marcas as $i => $marca): ?>
+                                <div class="form-check">
+                                    <input class="form-check-input filtro-checkbox"
+                                        type="checkbox"
+                                        value="<?= htmlspecialchars($marca['nombre']) ?>"
+                                        id="marcaDesktop<?= $i ?>"
+                                        data-filtro="marca">
+                                    <label class="form-check-label" for="marcaDesktop<?= $i ?>">
+                                        <?= htmlspecialchars($marca['nombre']) ?>
+                                    </label>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="text-muted small">No hay marcas registradas.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Filtro por Categoría -->
+                <div class="filtro-section">
+                    <button class="btn btn-outline-primary w-100 text-start d-flex justify-content-between align-items-center"
+                            type="button" data-bs-toggle="collapse" data-bs-target="#filtroCategoriaDesktop">
+                        <span><i class="bi bi-grid"></i> Categoría</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="collapse show mt-2" id="filtroCategoriaDesktop">
+                        <?php if (!empty($categorias)): ?>
+                            <?php foreach ($categorias as $i => $categoria): ?>
+                                <div class="form-check">
+                                    <input class="form-check-input filtro-checkbox"
+                                        type="checkbox"
+                                        value="<?= htmlspecialchars($categoria['nombre']) ?>"
+                                        id="catDesktop<?= $i ?>"
+                                        data-filtro="categoria">
+                                    <label class="form-check-label" for="catDesktop<?= $i ?>">
+                                        <?= htmlspecialchars($categoria['nombre']) ?>
+                                    </label>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="text-muted small">No hay categorías registradas.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+                <!-- Filtro por Sector -->
+                <div class="filtro-section">
+                    <button class="btn btn-outline-primary w-100 text-start d-flex justify-content-between align-items-center"
+                            type="button" data-bs-toggle="collapse" data-bs-target="#filtroSectorDesktop">
+                        <span><i class="bi bi-building"></i> Sector</span>
+                        <i class="bi bi-chevron-down"></i>
+                    </button>
+                    <div class="collapse show mt-2" id="filtroSectorDesktop">
+                        <?php if (!empty($sectores)): ?>
+                            <?php foreach ($sectores as $i => $sector): ?>
+                                <div class="form-check">
+                                    <input class="form-check-input filtro-checkbox"
+                                        type="checkbox"
+                                        value="<?= htmlspecialchars($sector['nombre']) ?>"
+                                        id="sectorDesktop<?= $i ?>"
+                                        data-filtro="sector">
+                                    <label class="form-check-label" for="sectorDesktop<?= $i ?>">
+                                        <?= htmlspecialchars($sector['nombre']) ?>
+                                    </label>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <p class="text-muted small">No hay sectores registrados.</p>
+                        <?php endif; ?>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Sidebar de Filtros para Móviles -->
+        <div class="col-filtros-mobile d-md-none">
+            <div class="filtros-sidebar" id="filtrosSidebar">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0"><i class="bi bi-funnel"></i> Filtros</h5>
+                    <div>
+                        <button class="btn btn-sm btn-outline-secondary me-2" id="limpiarFiltrosMobile">
+                            Limpiar
+                        </button>
+                        <button class="btn btn-sm btn-close btn-cerrar-filtros" id="cerrarFiltros" aria-label="Cerrar"></button>
+                    </div>
+                </div>
+
+                <!-- Filtros Activos -->
                 <div id="filtrosActivos" class="mb-3"></div>
                 
                 <!-- Filtro por Marca -->
                 <div class="filtro-section">
-                    <button class="btn btn-outline-primary w-100 text-start d-flex justify-content-between align-items-center" 
+                    <button class="btn btn-outline-primary w-100 text-start d-flex justify-content-between align-items-center"
                             type="button" data-bs-toggle="collapse" data-bs-target="#filtroMarca">
                         <span><i class="bi bi-tag"></i> Marca</span>
                         <i class="bi bi-chevron-down"></i>
@@ -106,9 +260,9 @@
                         <?php if (!empty($marcas)): ?>
                             <?php foreach ($marcas as $i => $marca): ?>
                                 <div class="form-check">
-                                    <input class="form-check-input filtro-checkbox" 
-                                        type="checkbox" 
-                                        value="<?= htmlspecialchars($marca['nombre']) ?>" 
+                                    <input class="form-check-input filtro-checkbox"
+                                        type="checkbox"
+                                        value="<?= htmlspecialchars($marca['nombre']) ?>"
                                         id="marca<?= $i ?>" 
                                         data-filtro="marca">
                                     <label class="form-check-label" for="marca<?= $i ?>">
@@ -124,7 +278,7 @@
                 
                 <!-- Filtro por Categoría -->
                 <div class="filtro-section">
-                    <button class="btn btn-outline-primary w-100 text-start d-flex justify-content-between align-items-center" 
+                    <button class="btn btn-outline-primary w-100 text-start d-flex justify-content-between align-items-center"
                             type="button" data-bs-toggle="collapse" data-bs-target="#filtroCategoria">
                         <span><i class="bi bi-grid"></i> Categoría</span>
                         <i class="bi bi-chevron-down"></i>
@@ -133,10 +287,10 @@
                         <?php if (!empty($categorias)): ?>
                             <?php foreach ($categorias as $i => $categoria): ?>
                                 <div class="form-check">
-                                    <input class="form-check-input filtro-checkbox" 
-                                        type="checkbox" 
+                                    <input class="form-check-input filtro-checkbox"
+                                        type="checkbox"
                                         value="<?= htmlspecialchars($categoria['nombre']) ?>" 
-                                        id="cat<?= $i ?>" 
+                                        id="cat<?= $i ?>"
                                         data-filtro="categoria">
                                     <label class="form-check-label" for="cat<?= $i ?>">
                                         <?= htmlspecialchars($categoria['nombre']) ?>
@@ -151,7 +305,7 @@
                 
                 <!-- Filtro por Sector -->
                 <div class="filtro-section">
-                    <button class="btn btn-outline-primary w-100 text-start d-flex justify-content-between align-items-center" 
+                    <button class="btn btn-outline-primary w-100 text-start d-flex justify-content-between align-items-center"
                             type="button" data-bs-toggle="collapse" data-bs-target="#filtroSector">
                         <span><i class="bi bi-building"></i> Sector</span>
                         <i class="bi bi-chevron-down"></i>
@@ -160,8 +314,8 @@
                         <?php if (!empty($sectores)): ?>
                             <?php foreach ($sectores as $i => $sector): ?>
                                 <div class="form-check">
-                                    <input class="form-check-input filtro-checkbox" 
-                                        type="checkbox" 
+                                    <input class="form-check-input filtro-checkbox"
+                                        type="checkbox"
                                         value="<?= htmlspecialchars($sector['nombre']) ?>" 
                                         id="sector<?= $i ?>" 
                                         data-filtro="sector">
@@ -180,7 +334,7 @@
         </div>
         
         <!-- Área de Productos -->
-        <div class="col-lg-9 col-md-8">
+        <div class="col-lg-9 col-md-8 col-12">
             
             <!-- Barra de resultados y ordenamiento -->
             <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap">
@@ -268,18 +422,13 @@ function obtenerProductosFiltrados() {
         // Filtro de búsqueda
         if (filtrosActivos.busqueda) {
             const busqueda = filtrosActivos.busqueda.toLowerCase();
-            const coincide = 
+            const coincide =
                 nombre.includes(busqueda) ||
                 marca.includes(busqueda) ||
                 referencia.includes(busqueda);
             if (!coincide) return false;
         }
 
-        // Filtro por marca
-        /*if (filtrosActivos.marca.length > 0 && !filtrosActivos.marca.includes(producto.marca)) {
-            return false;
-        }*/
-       //console.log(productosEjemplo);
        if (filtrosActivos.marca.length > 0) {
             const coincideMarca = filtrosActivos.marca.some(
                 f => f.toLowerCase() === marca
@@ -376,7 +525,8 @@ function renderizarPaginacion(totalProductos) {
 
 // Función para mostrar filtros activos
 function mostrarFiltrosActivos() {
-    const contenedor = document.getElementById('filtrosActivos');
+    const contenedorDesktop = document.getElementById('filtrosActivosDesktop');
+    const contenedorMobile = document.getElementById('filtrosActivos');
     let html = '';
     
     if (filtrosActivos.busqueda) {
@@ -395,6 +545,9 @@ function mostrarFiltrosActivos() {
     });
     
     contenedor.innerHTML = html;
+
+    if (contenedorDesktop) contenedorDesktop.innerHTML = html;
+    if (contenedorMobile) contenedorMobile.innerHTML = html;
 }
 
 // Función para eliminar filtro
@@ -415,13 +568,16 @@ function eliminarFiltro(tipo, valor) {
 }
 
 // Event Listeners
-document.getElementById('formBusqueda').addEventListener('submit', function(e) {
-    e.preventDefault();
-    filtrosActivos.busqueda = document.getElementById('busqueda').value;
-    paginaActual = 1;
-    renderizarProductos();
-    mostrarFiltrosActivos();
-});
+const formBusqueda = document.getElementById('formBusqueda');
+if (formBusqueda) {
+    formBusqueda.addEventListener('submit', function(e) {
+        e.preventDefault();
+        filtrosActivos.busqueda = document.getElementById('busqueda').value;
+        paginaActual = 1;
+        renderizarProductos();
+        mostrarFiltrosActivos();
+    });
+}
 
 document.querySelectorAll('.filtro-checkbox').forEach(checkbox => {
     checkbox.addEventListener('change', function() {
@@ -445,29 +601,79 @@ document.querySelectorAll('.filtro-checkbox').forEach(checkbox => {
     });
 });
 
-document.getElementById('limpiarFiltros').addEventListener('click', function() {
-    filtrosActivos = { marca: [], categoria: [], sector: [], busqueda: '' };
-    document.querySelectorAll('.filtro-checkbox').forEach(cb => cb.checked = false);
-    document.getElementById('busqueda').value = '';
-    paginaActual = 1;
-    renderizarProductos();
-    mostrarFiltrosActivos();
-});
-
-document.getElementById('porPagina').addEventListener('change', function() {
-    productosPorPagina = parseInt(this.value);
-    paginaActual = 1;
-    renderizarProductos();
-});
-
-document.getElementById('paginacion').addEventListener('click', function(e) {
-    e.preventDefault();
-    if (e.target.tagName === 'A' && e.target.dataset.pagina) {
-        paginaActual = parseInt(e.target.dataset.pagina);
+const btnLimpiarDesktop = document.getElementById('limpiarFiltros');
+if (btnLimpiarDesktop) {
+    btnLimpiarDesktop.addEventListener('click', function() {
+        filtrosActivos = { marca: [], categoria: [], sector: [], busqueda: '' };
+        document.querySelectorAll('.filtro-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('busqueda').value = '';
+        paginaActual = 1;
         renderizarProductos();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-});
+        mostrarFiltrosActivos();
+    });
+}
+
+const btnLimpiarMobile = document.getElementById('limpiarFiltrosMobile');
+if (btnLimpiarMobile) {
+    btnLimpiarMobile.addEventListener('click', function() {
+        filtrosActivos = { marca: [], categoria: [], sector: [], busqueda: '' };
+        document.querySelectorAll('.filtro-checkbox').forEach(cb => cb.checked = false);
+        document.getElementById('busqueda').value = '';
+        paginaActual = 1;
+        renderizarProductos();
+        mostrarFiltrosActivos();
+    });
+}
+
+const porPaginaSelect = document.getElementById('porPagina');
+if (porPaginaSelect) {
+    porPaginaSelect.addEventListener('change', function() {
+        productosPorPagina = parseInt(this.value);
+        paginaActual = 1;
+        renderizarProductos();
+        });
+}
+
+const paginacion = document.getElementById('paginacion');
+if (paginacion) {
+    paginacion.addEventListener('click', function(e) {
+        e.preventDefault();
+        if (e.target.tagName === 'A' && e.target.dataset.pagina) {
+            paginaActual = parseInt(e.target.dataset.pagina);
+            renderizarProductos();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+    });
+}
+
+// Panel de filtros en móviles
+const navbarToggler = document.getElementById('navbarToggler');
+const filtrosOverlay = document.getElementById('filtrosOverlay');
+const filtrosMobile = document.querySelector('.col-filtros-mobile');
+const cerrarFiltros = document.getElementById('cerrarFiltros');
+
+if (navbarToggler && filtrosMobile && filtrosOverlay) {
+    navbarToggler.addEventListener('click', function(e) {
+        e.preventDefault();
+        e.stopPropagation();
+        filtrosMobile.classList.add('show');
+        filtrosOverlay.classList.add('show');
+    });
+}
+
+if (cerrarFiltros && filtrosMobile && filtrosOverlay) {
+    cerrarFiltros.addEventListener('click', function() {
+        filtrosMobile.classList.remove('show');
+        filtrosOverlay.classList.remove('show');
+    });
+}
+
+if (filtrosOverlay && filtrosMobile) {
+    filtrosOverlay.addEventListener('click', function() {
+        filtrosMobile.classList.remove('show');
+        filtrosOverlay.classList.remove('show');
+    });
+}
 
 // Inicializar
 renderizarProductos();
