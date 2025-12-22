@@ -4,7 +4,7 @@
         <p class="text-muted mb-0">Organice los productos por sector o industria</p>
     </div>
     <?php if (AuthController::tienePermiso('sectores.crear')): ?>
-    <a href="/admin/sectores/crear" class="btn btn-primary">
+    <a href="<?php echo url('/admin/sectores/crear'); ?>" class="btn btn-primary">
         <i class="bi bi-plus-lg me-2"></i>Nuevo Sector
     </a>
     <?php endif; ?>
@@ -61,7 +61,7 @@
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
                                 <?php if (AuthController::tienePermiso('sectores.editar')): ?>
-                                <a href="/admin/sectores/editar/<?php echo $s['id']; ?>" class="btn btn-outline-primary" title="Editar">
+                                <a href="<?php echo url('/admin/sectores/editar/' . $s['id']); ?>" class="btn btn-outline-primary" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <?php endif; ?>
@@ -92,10 +92,12 @@ $(document).ready(function() {
     });
 });
 
+const sectoresBaseUrl = '<?php echo rtrim(url('/admin/sectores'), '/'); ?>';
+
 function eliminarSector(id, nombre) {
     if (!confirm(`¿Eliminar el sector "${nombre}"?`)) return;
 
-    fetch(`/admin/sectores/eliminar/${id}`, { method: 'DELETE' })
+    fetch(`${sectoresBaseUrl}/eliminar/${id}`, { method: 'DELETE' })
         .then(response => response.json())
         .then(data => {
             if (data.success) {

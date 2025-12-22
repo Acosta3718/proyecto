@@ -4,7 +4,7 @@
         <p class="text-muted mb-0">Administre las marcas disponibles para sus productos</p>
     </div>
     <?php if (AuthController::tienePermiso('marcas.crear')): ?>
-    <a href="/admin/marcas/crear" class="btn btn-primary">
+    <a href="<?php echo url('/admin/marcas/crear'); ?>" class="btn btn-primary">
         <i class="bi bi-plus-lg me-2"></i>Nueva Marca
     </a>
     <?php endif; ?>
@@ -81,7 +81,7 @@
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
                                 <?php if (AuthController::tienePermiso('marcas.editar')): ?>
-                                <a href="/admin/marcas/editar/<?php echo $m['id']; ?>" class="btn btn-outline-primary" title="Editar">
+                                <a href="<?php echo url('/admin/marcas/editar/' . $m['id']); ?>" class="btn btn-outline-primary" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
                                 <?php endif; ?>
@@ -112,10 +112,12 @@ $(document).ready(function() {
     });
 });
 
+const marcasBaseUrl = '<?php echo rtrim(url('/admin/marcas'), '/'); ?>';
+
 function eliminarMarca(id, nombre) {
     if (!confirm(`¿Eliminar la marca "${nombre}"?`)) return;
 
-    fetch(`/admin/marcas/eliminar/${id}`, { method: 'DELETE' })
+    fetch(`${marcasBaseUrl}/eliminar/${id}`, { method: 'DELETE' })
         .then(response => response.json())
         .then(data => {
             if (data.success) {

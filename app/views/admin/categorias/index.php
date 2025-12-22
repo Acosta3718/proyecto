@@ -4,7 +4,7 @@
         <p class="text-muted mb-0">Administre las categorías de productos</p>
     </div>
     <?php if (AuthController::tienePermiso('categorias.crear')): ?>
-    <a href="/admin/categorias/crear" class="btn btn-primary">
+    <a href="<?php echo url('/admin/categorias/crear'); ?>" class="btn btn-primary">
         <i class="bi bi-plus-lg me-2"></i>Nueva Categoría
     </a>
     <?php endif; ?>
@@ -93,7 +93,7 @@
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
                                 <?php if (AuthController::tienePermiso('categorias.editar')): ?>
-                                <a href="/admin/categorias/editar/<?php echo $cat['id']; ?>" 
+                                <a href="<?php echo url('/admin/categorias/editar/' . $cat['id']); ?>" 
                                    class="btn btn-outline-primary" 
                                    title="Editar">
                                     <i class="bi bi-pencil"></i>
@@ -138,7 +138,7 @@ function recargarTabla() {
 
 // Cambiar orden
 function cambiarOrden(id, nuevoOrden) {
-    fetch('/admin/categorias/cambiar-orden', {
+    fetch('<?php echo url('/admin/categorias/cambiar-orden'); ?>', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/x-www-form-urlencoded',
@@ -159,13 +159,15 @@ function cambiarOrden(id, nuevoOrden) {
     });
 }
 
+const categoriasBaseUrl = '<?php echo rtrim(url('/admin/categorias'), '/'); ?>';
+
 // Eliminar categoría
 function eliminarCategoria(id, nombre) {
     if (!confirm(`¿Está seguro de eliminar la categoría "${nombre}"?\n\nEsta acción no se puede deshacer.`)) {
         return;
     }
     
-    fetch(`/admin/categorias/eliminar/${id}`, {
+    fetch(`${categoriasBaseUrl}/eliminar/${id}`, {
         method: 'DELETE'
     })
     .then(response => response.json())

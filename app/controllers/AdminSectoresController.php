@@ -1,4 +1,5 @@
 <?php
+require_once __DIR__ . '/AuthController.php';
 require_once __DIR__ . '/../models/Sector.php';
 
 class AdminSectoresController extends BaseController

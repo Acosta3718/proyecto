@@ -1,6 +1,9 @@
 <?php
 $esEdicion = isset($categoria);
-$formAction = $esEdicion ? "/admin/categorias/actualizar/{$categoria['id']}" : "/admin/categorias/guardar";
+$formAction = $esEdicion
+    ? url("/admin/categorias/actualizar/{$categoria['id']}")
+    : url('/admin/categorias/guardar');
+$categoriasListadoUrl = url('/admin/categorias');
 ?>
 
 <div class="page-header mb-4">
@@ -121,7 +124,7 @@ $formAction = $esEdicion ? "/admin/categorias/actualizar/{$categoria['id']}" : "
                             <i class="bi bi-save me-2"></i>
                             <?php echo $esEdicion ? 'Actualizar' : 'Guardar'; ?> Categoría
                         </button>
-                        <a href="/admin/categorias" class="btn btn-outline-secondary">
+                        <a href="<?php echo $categoriasListadoUrl; ?>" class="btn btn-outline-secondary">
                             <i class="bi bi-x-lg me-2"></i>Cancelar
                         </a>
                     </div>
@@ -198,7 +201,7 @@ document.getElementById('formCategoria').addEventListener('submit', function(e) 
         if (data.success) {
             mostrarNotificacion('Categoría guardada exitosamente', 'success');
             setTimeout(() => {
-                window.location.href = '/admin/categorias';
+                window.location.href = '<?php echo $categoriasListadoUrl; ?>';
             }, 1500);
         } else {
             mostrarNotificacion(data.message || 'Error al guardar', 'error');

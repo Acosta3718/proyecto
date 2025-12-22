@@ -1,6 +1,9 @@
 <?php
 $esEdicion = isset($marca);
-$formAction = $esEdicion ? "/admin/marcas/actualizar/{$marca['id']}" : "/admin/marcas/guardar";
+$formAction = $esEdicion
+    ? url("/admin/marcas/actualizar/{$marca['id']}")
+    : url('/admin/marcas/guardar');
+$marcasListadoUrl = url('/admin/marcas');
 ?>
 
 <div class="page-header mb-4 d-flex justify-content-between align-items-center">
@@ -8,7 +11,7 @@ $formAction = $esEdicion ? "/admin/marcas/actualizar/{$marca['id']}" : "/admin/m
         <h1><i class="bi bi-bookmark-star me-2"></i><?php echo $esEdicion ? 'Editar' : 'Nueva'; ?> Marca</h1>
         <p class="text-muted mb-0">Complete el formulario para <?php echo $esEdicion ? 'actualizar' : 'crear'; ?> la marca</p>
     </div>
-    <a href="/admin/marcas" class="btn btn-outline-secondary">
+    <a href="<?php echo $marcasListadoUrl; ?>" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-2"></i>Volver al listado
     </a>
 </div>
@@ -67,7 +70,7 @@ $formAction = $esEdicion ? "/admin/marcas/actualizar/{$marca['id']}" : "/admin/m
                         <button type="submit" class="btn btn-primary" id="btnGuardar">
                             <i class="bi bi-save me-2"></i><?php echo $esEdicion ? 'Actualizar' : 'Guardar'; ?> Marca
                         </button>
-                        <a href="/admin/marcas" class="btn btn-outline-secondary">
+                        <a href="<?php echo $marcasListadoUrl; ?>" class="btn btn-outline-secondary">
                             <i class="bi bi-x-lg me-2"></i>Cancelar
                         </a>
                     </div>
@@ -134,7 +137,7 @@ formMarca.addEventListener('submit', function (e) {
         .then(data => {
             if (data.success) {
                 mostrarNotificacion('Marca guardada exitosamente', 'success');
-                setTimeout(() => window.location.href = '/admin/marcas', 1200);
+                setTimeout(() => window.location.href = '<?php echo $marcasListadoUrl; ?>', 1200);
             } else {
                 mostrarNotificacion(data.message || 'Error al guardar', 'error');
                 btn.disabled = false;
