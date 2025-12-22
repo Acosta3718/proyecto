@@ -41,7 +41,9 @@ if ($controller === 'admin') {
 
     // Si existe un submódulo (ej. /admin/productos), intentar cargar su controlador dedicado
     if (!empty($segments[1])) {
-        $adminModule = 'Admin' . ucfirst($segments[1]) . 'Controller';
+        $moduleSlug = $segments[1];
+        $moduleName = str_replace(' ', '', ucwords(str_replace(['-', '_'], ' ', $moduleSlug)));
+        $adminModule = 'Admin' . $moduleName . 'Controller';
         $adminModuleFile = __DIR__ . '/../app/controllers/' . $adminModule . '.php';
 
         if (file_exists($adminModuleFile)) {

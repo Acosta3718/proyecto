@@ -3,6 +3,7 @@
  * CONTROLADOR DE LISTAS DE PRECIOS
  */
 
+require_once __DIR__ . '/AuthController.php';
 require_once __DIR__ . '/../models/ListaPrecio.php';
 require_once __DIR__ . '/../models/Producto.php';
 

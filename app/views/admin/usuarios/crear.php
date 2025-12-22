@@ -1,64 +1,69 @@
-<?php
-$esEdicion = isset($item);
-$formAction = $esEdicion ? "/admin/MODULO/actualizar/{$item['id']}" : "/admin/MODULO/guardar";
-?>
+<?php $esEdicion = false; ?>
 
-<div class="page-header mb-4">
-    <h1><?php echo $esEdicion ? 'Editar' : 'Nuevo'; ?> ITEM</h1>
-</div>
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">Crear Usuario</h5>
+            </div>    
+            <div class="card-body">
+                <form id="formUsuario" action="/admin/usuarios/guardar" method="POST" enctype="multipart/form-data">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nombre" class="form-label">Nombre *</label>
+                            <input type="text" class="form-control" id="nombre" name="nombre" required>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="apellido" class="form-label">Apellido *</label>
+                            <input type="text" class="form-control" id="apellido" name="apellido" required>
+                        </div>
+                    </div>
 
-<div class="card">
-    <div class="card-body">
-        <form id="formItem" enctype="multipart/form-data">
-            <!-- Campos del formulario -->
-            <div class="mb-3">
-                <label for="nombre" class="form-label">Nombre *</label>
-                <input type="text" 
-                       class="form-control" 
-                       id="nombre" 
-                       name="nombre" 
-                       value="<?php echo $esEdicion ? htmlspecialchars($item['nombre']) : ''; ?>" 
-                       required>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email *</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Contraseña *</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="telefono" class="form-label">Teléfono</label>
+                        <input type="tel" class="form-control" id="telefono" name="telefono">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="direccion" class="form-label">Dirección</label>
+                        <textarea class="form-control" id="direccion" name="direccion" rows="2"></textarea>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="rol" class="form-label">Rol *</label>
+                        <select class="form-select" id="rol" name="rol" required>
+                            <?php foreach ($roles as $rol): ?>
+                            <option value="<?php echo $rol; ?>"><?php echo ucfirst($rol); ?></option>
+                            <?php endforeach; ?>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="avatar" class="form-label">Avatar</label>
+                        <input type="file" class="form-control" id="avatar" name="avatar" accept="image/*">
+                    </div>
+
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" id="activo" name="activo" checked>
+                        <label class="form-check-label" for="activo">Usuario activo</label>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary">Guardar</button>
+                        <a href="/admin/usuarios" class="btn btn-outline-secondary">Cancelar</a>
+                    </div>
+                </form>
             </div>
-            
-            <!-- Más campos... -->
-            
-            <div class="d-flex gap-2 mt-4">
-                <button type="submit" class="btn btn-primary" id="btnGuardar">
-                    <i class="bi bi-save me-2"></i>Guardar
-                </button>
-                <a href="/admin/MODULO" class="btn btn-outline-secondary">
-                    Cancelar
-                </a>
-            </div>
-        </form>
+        </div>
     </div>
 </div>
-
-<script>
-document.getElementById('formItem').addEventListener('submit', function(e) {
-    e.preventDefault();
-    
-    const btnGuardar = document.getElementById('btnGuardar');
-    btnGuardar.disabled = true;
-    btnGuardar.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span>Guardando...';
-    
-    const formData = new FormData(this);
-    
-    fetch('<?php echo $formAction; ?>', {
-        method: 'POST',
-        body: formData
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            mostrarNotificacion('Guardado exitosamente', 'success');
-            setTimeout(() => window.location.href = '/admin/MODULO', 1500);
-        } else {
-            mostrarNotificacion(data.message || 'Error al guardar', 'error');
-            btnGuardar.disabled = false;
-            btnGuardar.innerHTML = '<i class="bi bi-save me-2"></i>Guardar';
-        }
-    });
-});
-</script>

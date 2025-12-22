@@ -4,7 +4,7 @@
         <p class="text-muted mb-0">Cree y administre listas para diferentes clientes o promociones</p>
     </div>
     <?php if (AuthController::tienePermiso('listas_precios.crear')): ?>
-    <a href="/admin/listas-precios/crear" class="btn btn-primary">
+    <a href="<?php echo url('admin/listas-precios/crear'); ?>" class="btn btn-primary">
         <i class="bi bi-plus-lg me-2"></i>Nueva Lista
     </a>
     <?php endif; ?>
@@ -75,10 +75,10 @@
                         <td class="text-center">
                             <div class="btn-group btn-group-sm">
                                 <?php if (AuthController::tienePermiso('listas_precios.editar')): ?>
-                                <a href="/admin/listas-precios/editar/<?php echo $l['id']; ?>" class="btn btn-outline-primary" title="Editar">
+                                <a href="<?php echo url('admin/listas-precios/editar/' . $l['id']); ?>" class="btn btn-outline-primary" title="Editar">
                                     <i class="bi bi-pencil"></i>
                                 </a>
-                                <a href="/admin/listas-precios/asignar-productos/<?php echo $l['id']; ?>" class="btn btn-outline-success" title="Asignar productos">
+                                <a href="<?php echo url('admin/listas-precios/asignar-productos/' . $l['id']); ?>" class="btn btn-outline-success" title="Asignar productos">
                                     <i class="bi bi-box-seam"></i>
                                 </a>
                                 <?php endif; ?>
@@ -112,7 +112,7 @@ $(document).ready(function() {
 function eliminarLista(id, nombre) {
     if (!confirm(`¿Eliminar la lista "${nombre}"?`)) return;
 
-    fetch(`/admin/listas-precios/eliminar/${id}`, { method: 'DELETE' })
+     fetch(`<?php echo url('admin/listas-precios/eliminar/'); ?>${id}`, { method: 'DELETE' })
         .then(response => response.json())
         .then(data => {
             if (data.success) {

@@ -1,6 +1,8 @@
 <?php
 $esEdicion = isset($lista);
-$formAction = $esEdicion ? "/admin/listas-precios/actualizar/{$lista['id']}" : "/admin/listas-precios/guardar";
+$formAction = $esEdicion
+    ? url('admin/listas-precios/actualizar/' . $lista['id'])
+    : url('admin/listas-precios/guardar');
 ?>
 
 <div class="page-header mb-4 d-flex justify-content-between align-items-center">
@@ -8,7 +10,7 @@ $formAction = $esEdicion ? "/admin/listas-precios/actualizar/{$lista['id']}" : "
         <h1><i class="bi bi-cash-coin me-2"></i><?php echo $esEdicion ? 'Editar' : 'Nueva'; ?> Lista de Precios</h1>
         <p class="text-muted mb-0">Configure listas para aplicar precios o descuentos específicos</p>
     </div>
-    <a href="/admin/listas-precios" class="btn btn-outline-secondary">
+    <a href="<?php echo url('admin/listas-precios'); ?>" class="btn btn-outline-secondary">
         <i class="bi bi-arrow-left me-2"></i>Volver al listado
     </a>
 </div>
@@ -72,7 +74,7 @@ $formAction = $esEdicion ? "/admin/listas-precios/actualizar/{$lista['id']}" : "
                         <button type="submit" class="btn btn-primary" id="btnGuardar">
                             <i class="bi bi-save me-2"></i><?php echo $esEdicion ? 'Actualizar' : 'Guardar'; ?> Lista
                         </button>
-                        <a href="/admin/listas-precios" class="btn btn-outline-secondary">
+                        <a href="<?php echo url('admin/listas-precios'); ?>" class="btn btn-outline-secondary">
                             <i class="bi bi-x-lg me-2"></i>Cancelar
                         </a>
                     </div>
@@ -133,7 +135,7 @@ document.getElementById('formLista').addEventListener('submit', function(e) {
     .then(data => {
         if (data.success) {
             mostrarNotificacion('Lista de precios guardada exitosamente', 'success');
-            setTimeout(() => window.location.href = '/admin/listas-precios', 1200);
+            setTimeout(() => window.location.href = '<?php echo url("admin/listas-precios"); ?>', 1200);
         } else {
             mostrarNotificacion(data.message || 'Error al guardar', 'error');
             btn.disabled = false;
