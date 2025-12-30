@@ -91,9 +91,20 @@ $marcasListadoUrl = url('/admin/marcas');
                     <strong class="h4 mb-0 text-primary"><?php echo $stats['total_productos']; ?></strong>
                 </div>
                 <hr>
+                <?php
+                $fechaCreacion = $marca['fecha_creacion'] ?? ($marca['created_at'] ?? null);
+                $fechaFormateada = null;
+
+                if (!empty($fechaCreacion)) {
+                    $timestamp = strtotime($fechaCreacion);
+                    if ($timestamp !== false) {
+                        $fechaFormateada = date('d/m/Y', $timestamp);
+                    }
+                }
+                ?>
                 <small class="text-muted">
                     <i class="bi bi-info-circle me-1"></i>
-                    Marca creada el <?php echo date('d/m/Y', strtotime($marca['fecha_creacion'])); ?>
+                    <?php echo $fechaFormateada ? 'Marca creada el ' . $fechaFormateada : 'Fecha de creación no disponible'; ?>
                 </small>
             </div>
         </div>

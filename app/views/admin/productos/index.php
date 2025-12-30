@@ -327,8 +327,9 @@ function verProducto(id) {
                     <div class="row">
                         <div class="col-md-4">
                             <img src="${p.imagen || placeholderImage}"
-                                 class="img-fluid rounded" 
-                                 alt="${p.nombre}">
+                                 class="img-fluid rounded"
+                                 alt="${p.nombre}"
+                                 onerror="this.src='${placeholderImage}'">
                         </div>
                         <div class="col-md-8">
                             <h4>${p.nombre}</h4>

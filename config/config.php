@@ -11,8 +11,20 @@ date_default_timezone_set('America/Asuncion');
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
-// URL base de la aplicación
-define('BASE_URL', 'http://localhost:8080/proyecto/public');
+// URL base de la aplicación (dinámica según el host de la petición)
+$isHttps = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') || (isset($_SERVER['SERVER_PORT']) && $_SERVER['SERVER_PORT'] == 443);
+
+if (!empty($_SERVER['HTTP_HOST'])) {
+    $scheme = $isHttps ? 'https' : 'http';
+    $scriptDir = isset($_SERVER['SCRIPT_NAME']) ? rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'])), '/') : '';
+    $basePath = ($scriptDir === '/' || $scriptDir === '\\') ? '' : $scriptDir;
+    $baseUrl = $scheme . '://' . $_SERVER['HTTP_HOST'] . $basePath;
+} else {
+    // Fallback para entornos CLI o sin cabeceras HTTP definidas
+    $baseUrl = 'http://localhost:8080/proyecto/public';
+}
+
+define('BASE_URL', $baseUrl);
 define('PUBLIC_URL', BASE_URL);
 
 // Rutas del sistema

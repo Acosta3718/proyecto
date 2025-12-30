@@ -181,6 +181,38 @@ class ProductoController extends BaseController
     }
     
     /**
+     * Obtiene el detalle del producto en formato JSON con galería
+     */
+    public function detalleJson($id)
+    {
+        header('Content-Type: application/json');
+
+        try {
+            $producto = $this->productoModel->obtenerDetalleConRelaciones($id);
+
+            if (!$producto) {
+                return $this->json(['success' => false, 'message' => 'Producto no encontrado'], 404);
+            }
+
+            $producto['imagen'] = $this->construirUrlImagen($producto['imagen'] ?? '');
+
+            if (!empty($producto['galeria'])) {
+                foreach ($producto['galeria'] as &$imagen) {
+                    $imagen['imagen'] = $this->construirUrlImagen($imagen['imagen'] ?? '');
+                }
+                unset($imagen);
+            }
+
+            return $this->json(['success' => true, 'producto' => $producto]);
+        } catch (Exception $e) {
+            return $this->json([
+                'success' => false,
+                'message' => 'No se pudo obtener el detalle del producto'
+            ], 500);
+        }
+    }
+    
+    /**
      * Buscar productos (autocompletado)
      */
     public function buscarAutocompletado()

@@ -378,6 +378,24 @@
     </div>
 </div>
 
+<!-- Modal Detalle de Producto -->
+<div class="modal fade" id="modalDetalleProducto" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="bi bi-box-seam"></i> Detalle del Producto</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="detalleProductoContenido">
+                <div class="text-center py-4 text-muted">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 mb-0">Cargando producto...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Bootstrap 5 JS -->
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 
@@ -402,12 +420,17 @@ foreach ($productos as &$p) {
 unset($p);
 ?>
 
+const placeholderImage = '<?php echo $placeholder; ?>';
+
 const productosEjemplo = <?php echo json_encode($productos, JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES); ?>;
 
 const formatGs = (value) => new Intl.NumberFormat('es-PY', {
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
 }).format(Number(value) || 0);
+
+const detalleProductoUrl = '<?php echo url('/producto/detalleJson/'); ?>';
+let modalDetalleProducto;
 
 // Función para obtener productos filtrados
 function obtenerProductosFiltrados() {
@@ -464,27 +487,121 @@ function renderizarProductos() {
         return;
     }
     
-    grid.innerHTML = productosActuales.map(producto => `
+    grid.innerHTML = productosActuales.map(producto => {
+        const imagenProducto = producto.imagen || placeholderImage;
+
+        return `
         <div class="col-lg-3 col-md-4 col-sm-6">
-            <div class="card producto-card h-100">
-                <img src="${producto.imagen}" class="card-img-top" alt="${producto.nombre}">
+            <div class="card producto-card h-100" role="button" onclick="mostrarDetalleProducto(${producto.id})">
+                <img src="${imagenProducto}" class="card-img-top" alt="${producto.nombre}"
+                     onerror="this.src='${placeholderImage}'">
                 <div class="card-body d-flex flex-column">
                     <span class="badge bg-secondary mb-2 align-self-start">${producto.marca}</span>
                     <h6 class="card-title">${producto.nombre}</h6>
                     <p class="card-text text-muted small">Ref: ${producto.referencia}</p>
                     <div class="mt-auto">
                         <p class="h5 text-primary mb-2">Gs ${formatGs(producto.precio)}</p>
-                        <button class="btn btn-primary btn-sm w-100">
+                        <button class="btn btn-primary btn-sm w-100" onclick="event.stopPropagation();">
                             <i class="bi bi-cart-plus"></i> Agregar
                         </button>
                     </div>
                 </div>
             </div>
         </div>
-    `).join('');
+    `;
+    }).join('');
     
     document.getElementById('totalProductos').textContent = productosFiltrados.length;
     renderizarPaginacion(productosFiltrados.length);
+}
+
+function construirDetalleProducto(producto) {
+    const imagenPrincipal = producto.imagen || placeholderImage;
+    const imagenesAdicionales = (producto.galeria || []).map(img => img.imagen || placeholderImage);
+
+    const galeriaHtml = imagenesAdicionales.length > 0
+        ? imagenesAdicionales.map((img, i) => `
+            <img src="${img}"
+                 class="img-thumbnail"
+                 style="width: 70px; height: 70px; object-fit: cover; cursor: pointer;"
+                 alt="Miniatura ${i + 1}"
+                 onerror="this.src='${placeholderImage}'"
+                 onclick="cambiarImagenDetalle('${img}')">
+        `).join('')
+        : '<p class="text-muted small mb-0">Sin imágenes adicionales</p>';
+
+    return `
+        <div class="row g-3">
+            <div class="col-md-5">
+                <img id="imagenPrincipalProducto"
+                     src="${imagenPrincipal}"
+                     class="img-fluid rounded"
+                     alt="${producto.nombre}"
+                     onerror="this.src='${placeholderImage}'">
+                <div class="d-flex gap-2 flex-wrap mt-2">
+                    ${galeriaHtml}
+                </div>
+            </div>
+            <div class="col-md-7">
+                <h4>${producto.nombre}</h4>
+                <p class="text-muted">${producto.descripcion || 'Sin descripción disponible.'}</p>
+                <div class="mb-2"><strong>Precio:</strong> Gs ${formatGs(producto.precio)}</div>
+                <div class="mb-2"><strong>Referencia:</strong> ${producto.referencia || '-'}</div>
+                <div class="mb-2"><strong>Marca:</strong> ${producto.marca_nombre || '-'}</div>
+                <div class="mb-2"><strong>Categoría:</strong> ${producto.categoria_nombre || '-'}</div>
+                <div class="mb-2"><strong>Sector:</strong> ${producto.sector_nombre || '-'}</div>
+                <div class="mb-2"><strong>Stock:</strong> ${producto.stock ?? 0}</div>
+                <div class="mt-3">
+                    <button class="btn btn-primary me-2"><i class="bi bi-cart-plus"></i> Agregar al carrito</button>
+                    <button class="btn btn-outline-secondary" data-bs-dismiss="modal">Cerrar</button>
+                </div>
+            </div>
+        </div>
+    `;
+}
+
+function cambiarImagenDetalle(src) {
+    const img = document.getElementById('imagenPrincipalProducto');
+    if (img) {
+        img.src = src || placeholderImage;
+    }
+}
+
+function mostrarDetalleProducto(id) {
+    const modalEl = document.getElementById('modalDetalleProducto');
+
+    if (!modalDetalleProducto) {
+        modalDetalleProducto = new bootstrap.Modal(modalEl);
+    }
+
+    modalDetalleProducto.show();
+
+    const contenido = document.getElementById('detalleProductoContenido');
+    contenido.innerHTML = `
+        <div class="text-center py-4 text-muted">
+            <div class="spinner-border text-primary" role="status"></div>
+            <p class="mt-2 mb-0">Cargando producto...</p>
+        </div>
+    `;
+
+    fetch(`${detalleProductoUrl}${id}`)
+        .then(res => res.json())
+        .then(data => {
+            if (data.success && data.producto) {
+                contenido.innerHTML = construirDetalleProducto(data.producto);
+            } else {
+                contenido.innerHTML = `
+                    <div class="alert alert-warning mb-0">
+                        <i class="bi bi-exclamation-triangle"></i> ${data.message || 'No se pudo cargar el producto.'}
+                    </div>`;
+            }
+        })
+        .catch(() => {
+            contenido.innerHTML = `
+                <div class="alert alert-danger mb-0">
+                    <i class="bi bi-wifi-off"></i> Error de conexión al obtener el producto.
+                </div>`;
+        });
 }
 
 // Función para renderizar paginación

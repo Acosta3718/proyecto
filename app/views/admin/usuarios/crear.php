@@ -7,7 +7,7 @@
                 <h5 class="mb-0">Crear Usuario</h5>
             </div>    
             <div class="card-body">
-                <form id="formUsuario" action="/admin/usuarios/guardar" method="POST" enctype="multipart/form-data">
+                <form id="formUsuario" action="<?php echo url('/admin/usuarios/guardar'); ?>" method="POST" enctype="multipart/form-data">
                     <div class="row">
                         <div class="col-md-6 mb-3">
                             <label for="nombre" class="form-label">Nombre *</label>
@@ -60,7 +60,7 @@
 
                     <div class="d-flex gap-2 mt-4">
                         <button type="submit" class="btn btn-primary">Guardar</button>
-                        <a href="/admin/usuarios" class="btn btn-outline-secondary">Cancelar</a>
+                        <a href="<?php echo url('/admin/usuarios'); ?>" class="btn btn-outline-secondary">Cancelar</a>
                     </div>
                 </form>
             </div>

@@ -64,6 +64,11 @@ class AdminProductosController extends BaseController
         try {
             $resultado = $this->productoModel->obtenerTodosConRelaciones();
             
+            $resultado = array_map(function ($producto) {
+                $producto['imagen'] = $this->construirUrlImagen($producto['imagen'] ?? '');
+                return $producto;
+            }, $resultado);
+
             echo json_encode([
                 'success' => true,
                 'data' => $resultado
@@ -288,6 +293,15 @@ class AdminProductosController extends BaseController
                 throw new Exception('Producto no encontrado');
             }
 
+            $producto['imagen'] = $this->construirUrlImagen($producto['imagen'] ?? '');
+
+            if (!empty($producto['galeria'])) {
+                foreach ($producto['galeria'] as &$imagen) {
+                    $imagen['imagen'] = $this->construirUrlImagen($imagen['imagen'] ?? '');
+                }
+                unset($imagen);
+            }
+
             return $this->json([
                 'success' => true,
                 'producto' => $producto
@@ -427,6 +441,22 @@ class AdminProductosController extends BaseController
                 }
             }
         }
+    }
+    
+    /**
+     * Devuelve la URL absoluta de una imagen almacenada en /public/uploads
+     */
+    private function construirUrlImagen($ruta)
+    {
+        if (empty($ruta)) {
+            return '';
+        }
+
+        if (preg_match('/^https?:\/\//', $ruta)) {
+            return $ruta;
+        }
+
+        return asset(ltrim($ruta, '/'));
     }
     
     /**
